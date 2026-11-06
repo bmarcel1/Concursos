@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """
-Script para buscar concursos públicos em São Paulo com critérios:
+Script melhorado e aprofundado para buscar concursos públicos em São Paulo com critérios:
 - Salário > R$ 10.000
 - Mais de 10 vagas
 - Atuação em SP
 - Status: inscrições abertas, edital publicado ou autorizado
 
-Gera o arquivo index.html atualizado.
+Busca em múltiplos portais (PCI, Ache, JC, Gran, Estratégia, QConcursos, etc.) e usa fallback expandido com dados reais recentes.
 """
 
 import requests
@@ -14,17 +14,15 @@ from bs4 import BeautifulSoup
 from datetime import datetime
 import json
 import re
-import os
 
-# Critérios
 SALARIO_MIN = 10000
 VAGAS_MIN = 10
 
 def parse_salary(text):
     if not text:
         return 0
-    # Extrai números de strings como "até R$ 29.716,00" ou "R$ 11.359"
-    numbers = re.findall(r'[\d\.]+', text.replace('.', '').replace(',', '.'))
+    clean = text.replace('.', '').replace(',', '.')
+    numbers = re.findall(r'[\d\.]+', clean)
     if numbers:
         try:
             return float(numbers[-1])
@@ -38,29 +36,30 @@ def parse_vagas(text):
     match = re.search(r'(\d+)', str(text))
     return int(match.group(1)) if match else 0
 
-def scrape_pci():
-    """Tenta raspar o PCI Concursos (pode precisar de ajustes se o site mudar)"""
+def scrape_generic(url, source_name):
+    """Scraper genérico com headers e timeout"""
     concursos = []
     try:
-        headers = {'User-Agent': 'Mozilla/5.0 (compatible; ConcursosBot/1.0)'}
-        r = requests.get('https://www.pciconcursos.com.br/concursos/sp/', headers=headers, timeout=15)
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Accept-Language': 'pt-BR,pt;q=0.9,en;q=0.8'
+        }
+        r = requests.get(url, headers=headers, timeout=25)
         r.raise_for_status()
         soup = BeautifulSoup(r.text, 'html.parser')
-        # Ajuste o seletor conforme a estrutura atual do site
-        # Este é um exemplo básico — sites mudam com frequência
-        items = soup.select('.concurso-item, .item-concurso, article, .card')[:20]  # limite para não sobrecarregar
+        items = soup.select('article, .card, .item, .concurso, tr, .post, .news-item, .listing')[:40]
         for item in items:
             text = item.get_text(' ', strip=True)
-            if 'SP' not in text and 'São Paulo' not in text:
+            if not any(x in text.lower() for x in ['sp', 'são paulo', 'sao paulo', 'paulista']):
                 continue
-            # Extração simples (melhorar conforme necessário)
-            title = item.find(['h2', 'h3', 'a'])
-            title = title.get_text(strip=True) if title else 'Concurso SP'
+            title_el = item.find(['h2', 'h3', 'h4', 'a', 'strong', '.title'])
+            title = title_el.get_text(strip=True) if title_el else source_name
             salario = parse_salary(text)
             vagas = parse_vagas(text)
             if salario >= SALARIO_MIN and vagas >= VAGAS_MIN:
                 concursos.append({
-                    'orgao': title,
+                    'orgao': title[:90],
                     'cargo': 'Ver edital',
                     'vagas': vagas,
                     'salario': salario,
@@ -70,15 +69,37 @@ def scrape_pci():
                     'escolaridade': 'Ver edital',
                     'banca': 'Ver edital',
                     'prova': 'Ver edital',
-                    'link': 'https://www.pciconcursos.com.br/concursos/sp/',
-                    'detalhes': 'https://www.pciconcursos.com.br/concursos/sp/'
+                    'link': url,
+                    'detalhes': url
                 })
     except Exception as e:
-        print(f'Erro ao raspar PCI: {e}')
+        print(f'Erro ao raspar {source_name}: {e}')
     return concursos
 
+def scrape_all():
+    sources = [
+        ('https://www.pciconcursos.com.br/concursos/sp/', 'PCI Concursos'),
+        ('https://www.acheconcursos.com.br/concursos-sao-paulo', 'Ache Concursos'),
+        ('https://jcconcursos.com.br/concursos/sp', 'JC Concursos'),
+        ('https://blog.grancursosonline.com.br/concursos-sao-paulo-sp/', 'Gran Cursos'),
+        ('https://concursos.estrategia.com/portal/concursos-sp/', 'Estratégia Concursos'),
+        ('https://folha.qconcursos.com/n/concursos-sao-paulo', 'QConcursos Folha'),
+        ('https://www.qconcursos.com/concursos/sao-paulo', 'QConcursos'),
+        ('https://comunidadedosconcursos.com.br/concursos-abertos-sp/', 'Comunidade dos Concursos'),
+        ('https://ondetemconcursos.com.br/', 'Onde Tem Concursos'),
+        ('https://concursosbr.com/concursos/sao-paulo', 'ConcursosBR'),
+        ('https://radardeconcurso.com.br/', 'Radar de Concursos'),
+        ('https://www.direcaoconcursos.com.br/', 'Direção Concursos'),
+    ]
+    all_results = []
+    for url, name in sources:
+        print(f'Buscando em {name}...')
+        results = scrape_generic(url, name)
+        all_results.extend(results)
+    return all_results
+
 def get_fallback_data():
-    """Dados conhecidos como fallback (atualize manualmente se necessário)"""
+    """Fallback expandido com concursos reais recentes de múltiplas fontes"""
     return [
         {
             'orgao': 'DPE-SP (Defensoria Pública do Estado de São Paulo)',
@@ -135,6 +156,174 @@ def get_fallback_data():
             'prova': '17/01/2027',
             'link': 'https://g1.globo.com/sp/campinas-regiao/concursos-e-emprego/noticia/2026/09/09/concurso-da-setec-em-campinas-edital-abre-40-vagas-com-salario-de-ate-r-114-mil.ghtml',
             'detalhes': 'https://comunidadedosconcursos.com.br/concurso-setec-campinas-sp-2026/'
+        },
+        {
+            'orgao': 'SEFAZ-SP (Secretaria da Fazenda e Planejamento)',
+            'cargo': 'Analista em Planejamento, Orçamento e Finanças Públicas (APOFP)',
+            'vagas': 60,
+            'salario': 11359,
+            'status': 'published',
+            'statusLabel': 'Edital publicado (inscrições encerradas ~05/11/2026)',
+            'local': 'São Paulo (SP)',
+            'escolaridade': 'Nível Superior em qualquer área',
+            'banca': 'FCC',
+            'prova': '20/12/2026',
+            'link': 'https://concursos.estrategia.com/portal/concurso-sefaz-sp/',
+            'detalhes': 'https://jcconcursos.com.br/noticia/concursos/sefaz-tj-dpe-e-mais-veja-grandes-concursos-abertos-em-sao-paulo-146252'
+        },
+        {
+            'orgao': 'Prefeitura de Suzano-SP',
+            'cargo': 'Diversos (Professor, Agente, etc.)',
+            'vagas': 73,
+            'salario': 12062,
+            'status': 'open',
+            'statusLabel': 'Inscrições até 25/11/2026',
+            'local': 'Suzano - SP',
+            'escolaridade': 'Fundamental a Superior',
+            'banca': 'Nosso Rumo',
+            'prova': '13/12/2026',
+            'link': 'https://www.acheconcursos.com.br/concursos-sao-paulo/concurso-suzano-sp-2026-prefeitura-abre-73-vagas-94225',
+            'detalhes': 'https://jcconcursos.com.br/noticia/concursos/concurso-da-prefeitura-de-suzano-sp-abre-inscricao-para-73-vagas-de-todos-os-niveis-146285'
+        },
+        {
+            'orgao': 'UFABC',
+            'cargo': 'Diversos (Professor e técnicos)',
+            'vagas': 79,
+            'salario': 13753,
+            'status': 'open',
+            'statusLabel': 'Inscrições até 28/01/2027',
+            'local': 'Santo André / São Bernardo - SP',
+            'escolaridade': 'Superior',
+            'banca': 'Ver edital',
+            'prova': 'Ver edital',
+            'link': 'https://www.acheconcursos.com.br/concursos-sao-paulo',
+            'detalhes': 'https://www.acheconcursos.com.br/concursos-sao-paulo'
+        },
+        {
+            'orgao': 'IPA-SP (Instituto de Pesquisas Ambientais)',
+            'cargo': 'Pesquisador Científico',
+            'vagas': 98,
+            'salario': 22677,
+            'status': 'open',
+            'statusLabel': 'Inscrições 18/11 a 22/12/2026',
+            'local': 'São Paulo (SP)',
+            'escolaridade': 'Superior',
+            'banca': 'Vunesp',
+            'prova': 'Ver edital',
+            'link': 'https://blog.grancursosonline.com.br/concursos-sao-paulo-sp/',
+            'detalhes': 'https://blog.grancursosonline.com.br/concursos-sao-paulo-sp/'
+        },
+        {
+            'orgao': 'COREN-SP',
+            'cargo': 'Diversos',
+            'vagas': 76,
+            'salario': 12190,
+            'status': 'open',
+            'statusLabel': 'Edital publicado / inscrições abertas',
+            'local': 'São Paulo (SP)',
+            'escolaridade': 'Médio / Superior',
+            'banca': 'Quadrix',
+            'prova': 'Ver edital',
+            'link': 'https://concursos.estrategia.com/portal/concursos-sp/',
+            'detalhes': 'https://concursos.estrategia.com/portal/concursos-sp/'
+        },
+        {
+            'orgao': 'TJ-SP (Tribunal de Justiça de São Paulo)',
+            'cargo': 'Oficial de Justiça e Escrevente Técnico',
+            'vagas': 132,
+            'salario': 10276,
+            'status': 'open',
+            'statusLabel': 'Inscrições abertas até 10/12/2026',
+            'local': 'São Paulo (SP)',
+            'escolaridade': 'Médio e Superior',
+            'banca': 'Vunesp',
+            'prova': '14/03/2027',
+            'link': 'https://jcconcursos.com.br/noticia/concursos/concurso-do-tj-sp-salario-de-oficial-de-justica-sobe-para-r-102-mil-146440',
+            'detalhes': 'https://jcconcursos.com.br/noticia/concursos/sefaz-tj-dpe-e-mais-veja-grandes-concursos-abertos-em-sao-paulo-146252'
+        },
+        {
+            'orgao': 'Prefeitura de Guaratinguetá-SP',
+            'cargo': 'Diversos (86 cargos)',
+            'vagas': 107,
+            'salario': 18540,
+            'status': 'open',
+            'statusLabel': 'Inscrições 16/11 a 15/12/2026',
+            'local': 'Guaratinguetá - SP',
+            'escolaridade': 'Fundamental a Superior',
+            'banca': 'Vunesp',
+            'prova': '21/02/2027',
+            'link': 'https://www.aprovaconcursos.com.br/noticias/concurso-prefeitura-guaratingueta-sp/',
+            'detalhes': 'https://www.acheconcursos.com.br/concursos-sao-paulo'
+        },
+        {
+            'orgao': 'Prefeitura de Campinas-SP',
+            'cargo': 'Diversos',
+            'vagas': 485,
+            'salario': 11485,
+            'status': 'open',
+            'statusLabel': 'Banca definida / edital em andamento',
+            'local': 'Campinas - SP',
+            'escolaridade': 'Fundamental a Superior',
+            'banca': 'FCC',
+            'prova': 'Ver edital',
+            'link': 'https://concursos.estrategia.com/portal/concursos-sp/',
+            'detalhes': 'https://concursos.estrategia.com/portal/concursos-sp/'
+        },
+        {
+            'orgao': 'SP Águas',
+            'cargo': 'Especialista e Analista',
+            'vagas': 190,
+            'salario': 12070,
+            'status': 'published',
+            'statusLabel': 'Autorizado / banca FGV',
+            'local': 'São Paulo (SP)',
+            'escolaridade': 'Nível Superior',
+            'banca': 'FGV',
+            'prova': 'Ver edital',
+            'link': 'https://concursos.estrategia.com/portal/concursos-sp/',
+            'detalhes': 'https://concursos.estrategia.com/portal/concursos-sp/'
+        },
+        {
+            'orgao': 'CETESB',
+            'cargo': 'Diversos (Técnico e Superior)',
+            'vagas': 107,
+            'salario': 10767,
+            'status': 'open',
+            'statusLabel': 'Banca definida',
+            'local': 'São Paulo (SP)',
+            'escolaridade': 'Técnico e Superior',
+            'banca': 'FCC',
+            'prova': 'Ver edital',
+            'link': 'https://concursos.estrategia.com/portal/concursos-sp/',
+            'detalhes': 'https://concursos.estrategia.com/portal/concursos-sp/'
+        },
+        {
+            'orgao': 'Prefeitura de Birigui-SP',
+            'cargo': 'Diversos',
+            'vagas': 171,
+            'salario': 13881,
+            'status': 'open',
+            'statusLabel': 'Inscrições até 10/12/2026',
+            'local': 'Birigui - SP',
+            'escolaridade': 'Fundamental a Técnico',
+            'banca': 'Ver edital',
+            'prova': 'Ver edital',
+            'link': 'https://www.acheconcursos.com.br/concursos-sao-paulo',
+            'detalhes': 'https://www.acheconcursos.com.br/concursos-sao-paulo'
+        },
+        {
+            'orgao': 'Prefeitura de Guaiçara-SP',
+            'cargo': 'Diversos',
+            'vagas': 33,
+            'salario': 17716,
+            'status': 'open',
+            'statusLabel': 'Inscrições até 11/11/2026',
+            'local': 'Guaiçara - SP',
+            'escolaridade': 'Fundamental a Superior',
+            'banca': 'Ver edital',
+            'prova': 'Ver edital',
+            'link': 'https://www.acheconcursos.com.br/concursos-sao-paulo',
+            'detalhes': 'https://www.acheconcursos.com.br/concursos-sao-paulo'
         }
     ]
 
@@ -175,23 +364,22 @@ def generate_html(concursos):
 <body>
 <header>
   <h1>Localizador de Concursos Públicos SP</h1>
-  <p class="subtitle">Inscrições abertas / Edital publicado / Autorizado • Salário > R$ 10.000 • +10 vagas • Atuação em São Paulo</p>
-  <p style="margin-top:0.5rem; font-size:0.85rem; opacity:0.9;">Dados atualizados em {today} • Sempre confira o edital oficial</p>
+  <p class="subtitle">Salário > R$ 10.000 • +10 Vagas • Atuação em SP • Atualizado em {today}</p>
 </header>
 <div class="filters">
   <input type="text" id="search" placeholder="Buscar órgão ou cargo..." oninput="filterCards()">
   <select id="statusFilter" onchange="filterCards()">
     <option value="">Todos os status</option>
     <option value="open">Inscrições abertas</option>
-    <option value="published">Edital publicado</option>
+    <option value="published">Edital publicado / Autorizado</option>
   </select>
   <button onclick="filterCards()">Filtrar</button>
 </div>
-<div class="grid" id="cards"></div>
-<div class="empty" id="empty" style="display:none;">Nenhum concurso encontrado com os filtros.</div>
+<div id="cards" class="grid"></div>
+<div id="empty" class="empty" style="display:none;">Nenhum concurso encontrado com os filtros.</div>
 <footer>
-  <p>App gerado automaticamente. Não substitui consulta ao Diário Oficial ou site da banca.</p>
-  <p>Fontes: PCI Concursos, JC Concursos e outros portais públicos.</p>
+  <p>App gerado automaticamente. Não substitui pesquisa direta nos editais oficiais.</p>
+  <p>Fontes: PCI, Ache Concursos, JC, Gran, Estratégia, QConcursos, Comunidade dos Concursos e outros portais.</p>
 </footer>
 <script>
 const concursos = {data_js};
@@ -243,15 +431,20 @@ filterCards();
     return html
 
 def main():
-    print('Buscando concursos...')
-    scraped = scrape_pci()
+    print('Buscando concursos em múltiplos portais (busca aprofundada)...')
+    scraped = scrape_all()
     fallback = get_fallback_data()
-    # Combina e remove duplicatas simples
-    all_concursos = scraped + [c for c in fallback if c['orgao'] not in [s['orgao'] for s in scraped]]
-    # Filtra novamente pelos critérios
+    # Combina e remove duplicatas simples por órgão
+    seen = set()
+    all_concursos = []
+    for c in scraped + fallback:
+        key = c['orgao'][:50].lower()
+        if key not in seen:
+            seen.add(key)
+            all_concursos.append(c)
     filtered = [c for c in all_concursos if c['salario'] >= SALARIO_MIN and c['vagas'] >= VAGAS_MIN]
     if not filtered:
-        filtered = fallback  # pelo menos mostra algo
+        filtered = fallback
     html = generate_html(filtered)
     with open('index.html', 'w', encoding='utf-8') as f:
         f.write(html)
