@@ -32,26 +32,193 @@
 <body>
 <header>
   <h1>Localizador de Concursos Públicos SP</h1>
-  <p class="subtitle">Inscrições abertas / Edital publicado / Autorizado • Salário > R$ 10.000 • +10 vagas • Atuação em São Paulo</p>
-  <p style="margin-top:0.5rem; font-size:0.85rem; opacity:0.9;">Dados atualizados em 06/11/2026 • Sempre confira o edital oficial</p>
+  <p class="subtitle">Salário > R$ 10.000 • +10 Vagas • Atuação em SP • Atualizado em 06/11/2026</p>
 </header>
 <div class="filters">
   <input type="text" id="search" placeholder="Buscar órgão ou cargo..." oninput="filterCards()">
   <select id="statusFilter" onchange="filterCards()">
     <option value="">Todos os status</option>
     <option value="open">Inscrições abertas</option>
-    <option value="published">Edital publicado</option>
+    <option value="published">Edital publicado / Autorizado</option>
   </select>
   <button onclick="filterCards()">Filtrar</button>
 </div>
-<div class="grid" id="cards"></div>
-<div class="empty" id="empty" style="display:none;">Nenhum concurso encontrado com os filtros.</div>
+<div id="cards" class="grid"></div>
+<div id="empty" class="empty" style="display:none;">Nenhum concurso encontrado com os filtros.</div>
 <footer>
-  <p>App gerado automaticamente. Não substitui consulta ao Diário Oficial ou site da banca.</p>
-  <p>Fontes: PCI Concursos, JC Concursos e outros portais públicos.</p>
+  <p>App gerado automaticamente. Não substitui pesquisa direta nos editais oficiais.</p>
+  <p>Fontes: PCI, Ache Concursos, JC, Gran, Estratégia, QConcursos, Comunidade dos Concursos e outros portais.</p>
 </footer>
 <script>
 const concursos = [
+  {
+    "orgao": "Concurso Prefeitura de Guaratinguetá-SP 2026 abre mais de 100 vagas",
+    "cargo": "Ver edital",
+    "vagas": 2026,
+    "salario": 18540.71,
+    "status": "open",
+    "statusLabel": "Inscrições abertas / Edital publicado",
+    "local": "São Paulo (SP)",
+    "escolaridade": "Ver edital",
+    "banca": "Ver edital",
+    "prova": "Ver edital",
+    "link": "https://www.acheconcursos.com.br/concursos-sao-paulo",
+    "detalhes": "https://www.acheconcursos.com.br/concursos-sao-paulo"
+  },
+  {
+    "orgao": "UNESP realiza novo concurso com salário de 25,2 mil em Botucatu-SP",
+    "cargo": "Ver edital",
+    "vagas": 25,
+    "salario": 25261.98,
+    "status": "open",
+    "statusLabel": "Inscrições abertas / Edital publicado",
+    "local": "São Paulo (SP)",
+    "escolaridade": "Ver edital",
+    "banca": "Ver edital",
+    "prova": "Ver edital",
+    "link": "https://www.acheconcursos.com.br/concursos-sao-paulo",
+    "detalhes": "https://www.acheconcursos.com.br/concursos-sao-paulo"
+  },
+  {
+    "orgao": "Edital Leme-SP 2026: Prefeitura abre concurso com vagas de até R$ 13.359",
+    "cargo": "Ver edital",
+    "vagas": 2026,
+    "salario": 13359.44,
+    "status": "open",
+    "statusLabel": "Inscrições abertas / Edital publicado",
+    "local": "São Paulo (SP)",
+    "escolaridade": "Ver edital",
+    "banca": "Ver edital",
+    "prova": "Ver edital",
+    "link": "https://www.acheconcursos.com.br/concursos-sao-paulo",
+    "detalhes": "https://www.acheconcursos.com.br/concursos-sao-paulo"
+  },
+  {
+    "orgao": "CETESB SP",
+    "cargo": "Ver edital",
+    "vagas": 107,
+    "salario": 11620.3,
+    "status": "open",
+    "statusLabel": "Inscrições abertas / Edital publicado",
+    "local": "São Paulo (SP)",
+    "escolaridade": "Ver edital",
+    "banca": "Ver edital",
+    "prova": "Ver edital",
+    "link": "https://blog.grancursosonline.com.br/concursos-sao-paulo-sp/",
+    "detalhes": "https://blog.grancursosonline.com.br/concursos-sao-paulo-sp/"
+  },
+  {
+    "orgao": "IPA SP",
+    "cargo": "Ver edital",
+    "vagas": 98,
+    "salario": 22677.11,
+    "status": "open",
+    "statusLabel": "Inscrições abertas / Edital publicado",
+    "local": "São Paulo (SP)",
+    "escolaridade": "Ver edital",
+    "banca": "Ver edital",
+    "prova": "Ver edital",
+    "link": "https://blog.grancursosonline.com.br/concursos-sao-paulo-sp/",
+    "detalhes": "https://blog.grancursosonline.com.br/concursos-sao-paulo-sp/"
+  },
+  {
+    "orgao": "COREN SP",
+    "cargo": "Ver edital",
+    "vagas": 72,
+    "salario": 12190.0,
+    "status": "open",
+    "statusLabel": "Inscrições abertas / Edital publicado",
+    "local": "São Paulo (SP)",
+    "escolaridade": "Ver edital",
+    "banca": "Ver edital",
+    "prova": "Ver edital",
+    "link": "https://blog.grancursosonline.com.br/concursos-sao-paulo-sp/",
+    "detalhes": "https://blog.grancursosonline.com.br/concursos-sao-paulo-sp/"
+  },
+  {
+    "orgao": "SP Águas",
+    "cargo": "Ver edital",
+    "vagas": 190,
+    "salario": 20628.67,
+    "status": "open",
+    "statusLabel": "Inscrições abertas / Edital publicado",
+    "local": "São Paulo (SP)",
+    "escolaridade": "Ver edital",
+    "banca": "Ver edital",
+    "prova": "Ver edital",
+    "link": "https://blog.grancursosonline.com.br/concursos-sao-paulo-sp/",
+    "detalhes": "https://blog.grancursosonline.com.br/concursos-sao-paulo-sp/"
+  },
+  {
+    "orgao": "Concurso USP 2026: Professor Titular - Edital 11/2026NÍVEL: Superior",
+    "cargo": "Ver edital",
+    "vagas": 2026,
+    "salario": 24309.11,
+    "status": "open",
+    "statusLabel": "Inscrições abertas / Edital publicado",
+    "local": "São Paulo (SP)",
+    "escolaridade": "Ver edital",
+    "banca": "Ver edital",
+    "prova": "Ver edital",
+    "link": "https://concursosbr.com/concursos/sao-paulo",
+    "detalhes": "https://concursosbr.com/concursos/sao-paulo"
+  },
+  {
+    "orgao": "Concurso UFSCAR-SP 2026: edital com 89 vagas para professoresNÍVEL: Superior",
+    "cargo": "Ver edital",
+    "vagas": 2026,
+    "salario": 13753.96,
+    "status": "open",
+    "statusLabel": "Inscrições abertas / Edital publicado",
+    "local": "São Paulo (SP)",
+    "escolaridade": "Ver edital",
+    "banca": "Ver edital",
+    "prova": "Ver edital",
+    "link": "https://concursosbr.com/concursos/sao-paulo",
+    "detalhes": "https://concursosbr.com/concursos/sao-paulo"
+  },
+  {
+    "orgao": "Concurso MP-SP 2026: sai edital para Analista de R$ 12.494NÍVEL: Superior",
+    "cargo": "Ver edital",
+    "vagas": 2026,
+    "salario": 12494.68,
+    "status": "open",
+    "statusLabel": "Inscrições abertas / Edital publicado",
+    "local": "São Paulo (SP)",
+    "escolaridade": "Ver edital",
+    "banca": "Ver edital",
+    "prova": "Ver edital",
+    "link": "https://concursosbr.com/concursos/sao-paulo",
+    "detalhes": "https://concursosbr.com/concursos/sao-paulo"
+  },
+  {
+    "orgao": "Concurso UNICAMP-SP: Prof. Dr. em Geologia - Edital e Inscrição 2026NÍVEL: Superior",
+    "cargo": "Ver edital",
+    "vagas": 2026,
+    "salario": 16353.3,
+    "status": "open",
+    "statusLabel": "Inscrições abertas / Edital publicado",
+    "local": "São Paulo (SP)",
+    "escolaridade": "Ver edital",
+    "banca": "Ver edital",
+    "prova": "Ver edital",
+    "link": "https://concursosbr.com/concursos/sao-paulo",
+    "detalhes": "https://concursosbr.com/concursos/sao-paulo"
+  },
+  {
+    "orgao": "Concurso Prefeitura de Jundiaí-SP 2026: 11 editais publicadosNÍVEL: Superior",
+    "cargo": "Ver edital",
+    "vagas": 2026,
+    "salario": 16590.03,
+    "status": "open",
+    "statusLabel": "Inscrições abertas / Edital publicado",
+    "local": "São Paulo (SP)",
+    "escolaridade": "Ver edital",
+    "banca": "Ver edital",
+    "prova": "Ver edital",
+    "link": "https://concursosbr.com/concursos/sao-paulo",
+    "detalhes": "https://concursosbr.com/concursos/sao-paulo"
+  },
   {
     "orgao": "DPE-SP (Defensoria Pública do Estado de São Paulo)",
     "cargo": "Defensor Público",
@@ -107,6 +274,160 @@ const concursos = [
     "prova": "17/01/2027",
     "link": "https://g1.globo.com/sp/campinas-regiao/concursos-e-emprego/noticia/2026/09/09/concurso-da-setec-em-campinas-edital-abre-40-vagas-com-salario-de-ate-r-114-mil.ghtml",
     "detalhes": "https://comunidadedosconcursos.com.br/concurso-setec-campinas-sp-2026/"
+  },
+  {
+    "orgao": "SEFAZ-SP (Secretaria da Fazenda e Planejamento)",
+    "cargo": "Analista em Planejamento, Orçamento e Finanças Públicas (APOFP)",
+    "vagas": 60,
+    "salario": 11359,
+    "status": "published",
+    "statusLabel": "Edital publicado (inscrições encerradas ~05/11/2026)",
+    "local": "São Paulo (SP)",
+    "escolaridade": "Nível Superior em qualquer área",
+    "banca": "FCC",
+    "prova": "20/12/2026",
+    "link": "https://concursos.estrategia.com/portal/concurso-sefaz-sp/",
+    "detalhes": "https://jcconcursos.com.br/noticia/concursos/sefaz-tj-dpe-e-mais-veja-grandes-concursos-abertos-em-sao-paulo-146252"
+  },
+  {
+    "orgao": "Prefeitura de Suzano-SP",
+    "cargo": "Diversos (Professor, Agente, etc.)",
+    "vagas": 73,
+    "salario": 12062,
+    "status": "open",
+    "statusLabel": "Inscrições até 25/11/2026",
+    "local": "Suzano - SP",
+    "escolaridade": "Fundamental a Superior",
+    "banca": "Nosso Rumo",
+    "prova": "13/12/2026",
+    "link": "https://www.acheconcursos.com.br/concursos-sao-paulo/concurso-suzano-sp-2026-prefeitura-abre-73-vagas-94225",
+    "detalhes": "https://jcconcursos.com.br/noticia/concursos/concurso-da-prefeitura-de-suzano-sp-abre-inscricao-para-73-vagas-de-todos-os-niveis-146285"
+  },
+  {
+    "orgao": "UFABC",
+    "cargo": "Diversos (Professor e técnicos)",
+    "vagas": 79,
+    "salario": 13753,
+    "status": "open",
+    "statusLabel": "Inscrições até 28/01/2027",
+    "local": "Santo André / São Bernardo - SP",
+    "escolaridade": "Superior",
+    "banca": "Ver edital",
+    "prova": "Ver edital",
+    "link": "https://www.acheconcursos.com.br/concursos-sao-paulo",
+    "detalhes": "https://www.acheconcursos.com.br/concursos-sao-paulo"
+  },
+  {
+    "orgao": "IPA-SP (Instituto de Pesquisas Ambientais)",
+    "cargo": "Pesquisador Científico",
+    "vagas": 98,
+    "salario": 22677,
+    "status": "open",
+    "statusLabel": "Inscrições 18/11 a 22/12/2026",
+    "local": "São Paulo (SP)",
+    "escolaridade": "Superior",
+    "banca": "Vunesp",
+    "prova": "Ver edital",
+    "link": "https://blog.grancursosonline.com.br/concursos-sao-paulo-sp/",
+    "detalhes": "https://blog.grancursosonline.com.br/concursos-sao-paulo-sp/"
+  },
+  {
+    "orgao": "COREN-SP",
+    "cargo": "Diversos",
+    "vagas": 76,
+    "salario": 12190,
+    "status": "open",
+    "statusLabel": "Edital publicado / inscrições abertas",
+    "local": "São Paulo (SP)",
+    "escolaridade": "Médio / Superior",
+    "banca": "Quadrix",
+    "prova": "Ver edital",
+    "link": "https://concursos.estrategia.com/portal/concursos-sp/",
+    "detalhes": "https://concursos.estrategia.com/portal/concursos-sp/"
+  },
+  {
+    "orgao": "TJ-SP (Tribunal de Justiça de São Paulo)",
+    "cargo": "Oficial de Justiça e Escrevente Técnico",
+    "vagas": 132,
+    "salario": 10276,
+    "status": "open",
+    "statusLabel": "Inscrições abertas até 10/12/2026",
+    "local": "São Paulo (SP)",
+    "escolaridade": "Médio e Superior",
+    "banca": "Vunesp",
+    "prova": "14/03/2027",
+    "link": "https://jcconcursos.com.br/noticia/concursos/concurso-do-tj-sp-salario-de-oficial-de-justica-sobe-para-r-102-mil-146440",
+    "detalhes": "https://jcconcursos.com.br/noticia/concursos/sefaz-tj-dpe-e-mais-veja-grandes-concursos-abertos-em-sao-paulo-146252"
+  },
+  {
+    "orgao": "Prefeitura de Guaratinguetá-SP",
+    "cargo": "Diversos (86 cargos)",
+    "vagas": 107,
+    "salario": 18540,
+    "status": "open",
+    "statusLabel": "Inscrições 16/11 a 15/12/2026",
+    "local": "Guaratinguetá - SP",
+    "escolaridade": "Fundamental a Superior",
+    "banca": "Vunesp",
+    "prova": "21/02/2027",
+    "link": "https://www.aprovaconcursos.com.br/noticias/concurso-prefeitura-guaratingueta-sp/",
+    "detalhes": "https://www.acheconcursos.com.br/concursos-sao-paulo"
+  },
+  {
+    "orgao": "Prefeitura de Campinas-SP",
+    "cargo": "Diversos",
+    "vagas": 485,
+    "salario": 11485,
+    "status": "open",
+    "statusLabel": "Banca definida / edital em andamento",
+    "local": "Campinas - SP",
+    "escolaridade": "Fundamental a Superior",
+    "banca": "FCC",
+    "prova": "Ver edital",
+    "link": "https://concursos.estrategia.com/portal/concursos-sp/",
+    "detalhes": "https://concursos.estrategia.com/portal/concursos-sp/"
+  },
+  {
+    "orgao": "CETESB",
+    "cargo": "Diversos (Técnico e Superior)",
+    "vagas": 107,
+    "salario": 10767,
+    "status": "open",
+    "statusLabel": "Banca definida",
+    "local": "São Paulo (SP)",
+    "escolaridade": "Técnico e Superior",
+    "banca": "FCC",
+    "prova": "Ver edital",
+    "link": "https://concursos.estrategia.com/portal/concursos-sp/",
+    "detalhes": "https://concursos.estrategia.com/portal/concursos-sp/"
+  },
+  {
+    "orgao": "Prefeitura de Birigui-SP",
+    "cargo": "Diversos",
+    "vagas": 171,
+    "salario": 13881,
+    "status": "open",
+    "statusLabel": "Inscrições até 10/12/2026",
+    "local": "Birigui - SP",
+    "escolaridade": "Fundamental a Técnico",
+    "banca": "Ver edital",
+    "prova": "Ver edital",
+    "link": "https://www.acheconcursos.com.br/concursos-sao-paulo",
+    "detalhes": "https://www.acheconcursos.com.br/concursos-sao-paulo"
+  },
+  {
+    "orgao": "Prefeitura de Guaiçara-SP",
+    "cargo": "Diversos",
+    "vagas": 33,
+    "salario": 17716,
+    "status": "open",
+    "statusLabel": "Inscrições até 11/11/2026",
+    "local": "Guaiçara - SP",
+    "escolaridade": "Fundamental a Superior",
+    "banca": "Ver edital",
+    "prova": "Ver edital",
+    "link": "https://www.acheconcursos.com.br/concursos-sao-paulo",
+    "detalhes": "https://www.acheconcursos.com.br/concursos-sao-paulo"
   }
 ];
 function formatMoney(v) { return v.toLocaleString('pt-BR', {style:'currency', currency:'BRL'}); }
